@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"database/sql"
 	"fmt"
-	"go-todo/config"
 	"go-todo/models"
+	"go-todo/views"
 	"html/template"
 	"net/http"
 
@@ -15,15 +16,23 @@ var (
 	id        int
 	item      string
 	completed bool
-	view      = template.Must(template.ParseFiles("views/index.html"))
-	database  = config.Database()  // Initialize the database connection
+	view      = template.Must(template.ParseFS(views.FS, "index.html"))
+	database  *sql.DB              // Dont call first
 	logger, _ = argus.Init("logs") // Initialize the logger using Argus
 )
+
+// Initializes the database connection in the controller package
+func SetDatabase(db *sql.DB) {
+	database = db
+	logger.Verbose.Log("CONTROLLER", "Database connection set in controller")
+}
 
 func Show(w http.ResponseWriter, r *http.Request) {
 	statement, err := database.Query("SELECT * FROM gotodo.todos")
 	if err != nil {
 		logger.Error.LogErr("CONTROLLER", "Database query failed in Show", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 	defer statement.Close() // Ensure the statement is closed after we're done with it
 
@@ -33,7 +42,10 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		err = statement.Scan(&id, &item, &completed)
 		if err != nil {
 			logger.Error.LogErr("CONTROLLER", "Row scanning failed", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
+		defer statement.Close() // Ensure the statement is closed after we're done with it
 
 		todo := models.Todo{
 			Id:        id,

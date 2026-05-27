@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"go-todo/config"
+	"go-todo/controllers"
 	"go-todo/routes"
 	"log"
 	"net/http"
@@ -30,23 +32,23 @@ func main() {
 	if err := godotenv.Load(); err != nil { // We could use autoload, but this way we can log the error if the .env file is missing
 		// In the database package, we use autoload instead, so the error is only logged
 		logger.Error.LogErr("MAIN", "no .env file found", err)
-		log.Fatal("No .env file found")
 	}
 
-	logger.Verbose.Log("MAIN", "Loaded environment variables from .env file")
 	port, exist := os.LookupEnv("PORT")
 	if !exist {
 		err := errors.New("PORT not set in .env file")
 		logger.Error.LogErr("MAIN", "Environment variable missing", err)
-		log.Fatal(err)
 	}
+	logger.Verbose.Log("MAIN", "Loaded environment variables from .env file")
+
+	db := config.Database()
+	controllers.SetDatabase(db) // DI the database connection into the controllers package
 
 	logger.Verbose.Log("MAIN", fmt.Sprintf("Starting server on port %s...", port))
 	err = http.ListenAndServe(":"+port, routes.Init())
 
 	if err != nil {
 		logger.Critical.LogErr("MAIN", "Error starting server", err)
-		log.Fatal(fmt.Errorf("MAIN", "Error starting server: %s", err))
 	}
 
 	logger.Verbose.Log("MAIN", "Server started successfully on port "+port)
