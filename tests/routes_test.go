@@ -1,22 +1,29 @@
-package routes_test
+package tests
 
 import (
-	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"go-todo/config"
 	"go-todo/controllers"
 	"go-todo/routes"
 
-	_ "github.com/go-sql-driver/mysql" // Required for the dummy database connection
+	_ "github.com/go-sql-driver/mysql" // Required for the database connection
+	"github.com/joho/godotenv"
 )
 
-// TestInitRoutes verifies that the application's routes are initialized correctly.
+func init() {
+	_ = godotenv.Load("../.env") // Load environment variables for testing
+}
+
+// Verifies that the application's routes are initialized correctly.
 func TestInitRoutes(t *testing.T) {
-	// Use a dummy database connection to avoid nil pointer issues in controllers.
-	dummyDB, _ := sql.Open("mysql", "dummy:dummy@tcp(127.0.0.1:3306)/dummy")
-	controllers.SetDatabase(dummyDB)
+	// Use the actual database configuration.
+	// In Docker, it will use the environment variables (e.g., DB_HOST=db).
+	// Locally, it will fallback to 127.0.0.1.
+	testDB := config.Database()
+	controllers.SetDatabase(testDB)
 
 	router := routes.Init()
 

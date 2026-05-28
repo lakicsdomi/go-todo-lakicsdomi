@@ -12,7 +12,7 @@ func init() {
 	_ = godotenv.Load("../.env") // Load environment variables for testing
 }
 
-// TestDatabaseSuccess verifies that the database connects and initializes correctly.
+// Verifies that the database connects and initializes correctly.
 func TestDatabaseSuccess(t *testing.T) {
 	db := config.Database()
 	if db == nil {
