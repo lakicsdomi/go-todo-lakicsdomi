@@ -1,91 +1,110 @@
-# 📝 Go Todo Application
+# Go Todo Application
 
 ![Coverage](https://img.shields.io/badge/Coverage-79.8%25-brightgreen)
 ![Go Version](https://img.shields.io/badge/Go-1.26-blue)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
-![Architecture](https://img.shields.io/badge/Architecture-MVC-orange)
 
-A lightweight, fully functional ToDo application built with Go. This project serves as a showcase of **Clean Architecture**, **Dependency Injection**, and **Enterprise-grade DevOps practices**.
+A lightweight Todo application built with Go, focused on clean project structure, containerized development, and reliable testing workflows.
 
-Inspired by [ichtrojan/go-todo](https://github.com/ichtrojan/go-todo), but completely re-engineered from the ground up with focus on testability, containerization, and automated CI/CD workflows.
-
----
-
-## ✨ Key Features
-
-### 🏗 Software Architecture
-- **MVC Pattern**: Strict separation of concerns between Routing, Controllers, and Models.
-- **Dependency Injection**: Database connections are injected into controllers, preventing global state mutation and allowing for flawless integration testing.
-- **Embedded Frontend**: Uses Go's `embed` package to compile Bootstrap 5 HTML views directly into a single, portable binary.
-- **Custom Telemetry**: Integrated with the modular `argus` logging system, providing a standalone HTTP telemetry dashboard.
-
-### 🚀 DevOps & Infrastructure
-- **Multi-Stage Docker Builds**: Segregated stages for base dependencies, testing, compiling, and building the final minimal production image (using Alpine).
-- **Isolated Integration Testing**: A dedicated `docker-test` environment that spins up a throwaway MySQL instance, waits for healthchecks, and runs full lifecycle integration tests against a real database.
-- **Resilient CI/CD Pipeline**: GitHub Actions workflow featuring automated coverage badge generation via `Makefile` `sed` scripting, and a self-healing linting mechanism (Action with Docker fallback).
+The project was originally inspired by [ichtrojan/go-todo](https://github.com/ichtrojan/go-todo), but redesigned using my software architecture knowledge, integration testing, and automated CI/CD practices and it uses my own logger, Argus.
 
 ---
 
-## 🛠 Prerequisites
+## Features
 
-- **Go 1.26+** (For local development)
-- **Docker & Docker Compose** (Recommended for isolated execution)
-- **Make** (For build automation)
+### Application
+
+* MVC-style project structure
+* Dependency injection for database access
+* Bootstrap 5 frontend embedded directly into the binary using Go's `embed`
+* CRUD task management
+* Integrated Argus telemetry logging dashboard
+
+### Infrastructure & DevOps
+
+* Multi-stage Docker builds
+* Docker Compose setup for app + MySQL
+* Integration tests against a real database container
+* GitHub Actions CI pipeline
+* Automated coverage badge updates through Makefile scripts
 
 ---
 
-## 🚀 Quick Start (Docker - Recommended)
+## Prerequisites
 
-The easiest way to run the application is via Docker. This spins up a configured MySQL database and the minimal Go production container.
+* Go 1.26+
+* Docker & Docker Compose
+* Make
 
-```bash
+---
+
+## Quick Start (Docker)
+
+Clone the repository and start the full stack:
+
+```bash id="7h2kq1"
 git clone https://github.com/lakicsdomi/go-todo.git
 cd go-todo
 
-# Start the full stack (App + Database)
 make docker-up
 ```
 
-- **App Interface**: http://localhost:8080
+Services:
 
-- **Argus Telemetry Dashboard**: http://localhost:9090
+* App: `http://localhost:8080`
+* Argus Dashboard: `http://localhost:9090`
 
-To stop the containers and clean up volumes:
-```bash
+Stop and clean up containers:
+
+```bash id="m91x2d"
 make docker-down
 ```
 
-## 💻 Local Development
-1. Create a `.env` file in the root directory (based on `.env.example`):
+---
 
-    ```ini,toml
-    PORT=8080
-    DB_HOST=127.0.0.1
-    DB_USER=db_user
-    DB_PASS=db_password
-    ```
-2. Start your local MySQL server.
-3. Run the application:
-   ```bash
-    make run
-   ```
+## Local Development
 
-## 🧪 Testing & Code Quality
+Create a `.env` file in the project root:
 
-This project takes testing seriously, featuring full CRUD integration tests without hardcoded endpoints. The `Makefile` serves as the central hub for all operations.
+```env id="r8pn4v"
+PORT=8080
+DB_HOST=127.0.0.1
+DB_USER=db_user
+DB_PASS=db_password
+```
 
-### Makefile Commands
+Start your local MySQL server, then run:
 
-| Command | Description |
-| --- | --- |
-| `make test` | Runs local unit and integration tests with coverage. |
-| `make docker-test` | **[CI Standard]** Runs integration tests inside an isolated Docker network alongside a throwaway DB. Safely extracts `coverage.out` using `docker cp`. |
-| `make lint` | Runs `golangci-lint` locally. |
-| `make docker-lint` | Runs strict static analysis in an isolated container. |
-| `make update-badge` | Dynamically parses `coverage.out` and updates this README's badge using `sed` (No 3rd party actions required!). |
+```bash id="k0dz5t"
+make run
+```
 
-### CI/CD Simulation
+---
 
-To validate the `.github/workflows/ci.yml` pipeline locally before pushing, this repository supports [act](https://github.com/nektos/act).
-Run `act` in the root directory to simulate the exact GitHub Actions runner environment.
+## Testing & Code Quality
 
+The project includes integration tests covering the full CRUD lifecycle against a real MySQL instance.
+
+### Available Commands
+
+| Command             | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| `make test`         | Run unit and integration tests with coverage             |
+| `make docker-test`  | Run tests inside Docker with a temporary MySQL container |
+| `make lint`         | Run `golangci-lint` locally                              |
+| `make docker-lint`  | Run linting inside a container                           |
+| `make update-badge` | Update the README coverage badge automatically           |
+
+---
+
+## CI/CD
+
+The GitHub Actions workflow handles testing, linting, and coverage updates.
+
+You can also simulate the pipeline locally using:
+
+```bash id="c4u8y6"
+act
+```
+
+This runs the workflow in a local Docker-based GitHub Actions environment before pushing changes.
