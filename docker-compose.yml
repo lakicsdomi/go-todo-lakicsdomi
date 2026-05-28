@@ -10,9 +10,16 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-  
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   app:
-    build: .
+    build: 
+      context: .
+      target: release
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -22,7 +29,20 @@ services:
       - DB_USER=db_user
       - DB_PASS=db_password
     depends_on:
-      - db
-  
+      db:
+        condition: service_healthy
+
+  test:
+    build:
+      context: .
+      target: tester
+    environment:
+      - DB_HOST=db
+      - DB_USER=db_user
+      - DB_PASS=db_password
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db_data:

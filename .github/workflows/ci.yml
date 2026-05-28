@@ -7,21 +7,48 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-and-build:
-    name: Test and Docker Build
+  validate:
+    permissions:
+      contents: write # For the badge update commit
+    name: Validation Pipeline
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.26'
 
-      - name: Run Unit Tests
-        run: make test
+      - name: Download dependencies
+        run: make deps
 
-      - name: Verify Docker Build
-        run: docker build -t go-todo-ci-test .
+      - name: Run Linter
+        uses: golangci/golangci-lint-action@v9
+
+      - name: Run Integration Tests and Coverage (Dockerized)
+        run: make docker-test
+
+      - name: Extract Coverage
+        run: make coverage-summary
+
+      - name: Update Coverage Badge in README
+        if: env.ACT != 'true'
+        run: make update-badge
+
+      - name: Commit Coverage Badge
+        uses: stefanzweifel/git-auto-commit-action@v7
+        if: env.ACT != 'true'
+        with:
+          commit_message: "docs: update coverage badge"
+          file_pattern: README.md
+
+      # Ensure the minimal production image builds successfully
+      - name: Verify Production Docker Build
+        run: docker build --target release -t go-todo-prod .
+
+      - name: Cleanup Docker Resources
+        if: always()
+        run: make docker-down

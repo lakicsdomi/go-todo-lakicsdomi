@@ -1,3 +1,5 @@
+![Coverage](https://img.shields.io/badge/Coverage-0%25-brightgreen)
+
 # Go Todo App
 
 Inspired by [https://github.com/ichtrojan/go-todo](https://github.com/ichtrojan/go-todo)
