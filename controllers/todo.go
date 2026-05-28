@@ -34,7 +34,12 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	defer statement.Close() // Ensure the statement is closed after we're done with it
+
+	defer func() {
+		if err := statement.Close(); err != nil {
+			logger.Error.LogErr("CONTROLLER", "failed to close statement", err)
+		}
+	}() // Ensure the statement is closed after we're done with it
 
 	// Iterate over the rows returned by the query and populate the todos slice
 	var todos []models.Todo
@@ -45,7 +50,11 @@ func Show(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-		defer statement.Close() // Ensure the statement is closed after we're done with it
+		defer func() {
+			if err := statement.Close(); err != nil {
+				logger.Error.LogErr("CONTROLLER", "failed to close statement", err)
+			}
+		}() // Ensure the statement is closed after we're done with it
 
 		todo := models.Todo{
 			Id:        id,
