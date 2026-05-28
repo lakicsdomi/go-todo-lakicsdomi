@@ -39,7 +39,7 @@ Inspired by [ichtrojan/go-todo](https://github.com/ichtrojan/go-todo), but compl
 The easiest way to run the application is via Docker. This spins up a configured MySQL database and the minimal Go production container.
 
 ```bash
-git clone [https://github.com/lakicsdomi/go-todo.git](https://github.com/lakicsdomi/go-todo.git)
+git clone https://github.com/lakicsdomi/go-todo.git
 cd go-todo
 
 # Start the full stack (App + Database)
